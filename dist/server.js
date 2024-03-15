@@ -2,6 +2,7 @@
 const express = require('express');
 const mongoose = require("mongoose");
 require('dotenv').config();
+const authRoutes = require('./routes/AuthRoutes');
 const app = express();
 app.use(express.json());
 const url = process.env.MONGO_URL;
@@ -15,3 +16,4 @@ mongoose.connect(url)
     .catch((err) => {
     console.log(err);
 });
+app.use('/auth', authRoutes);
