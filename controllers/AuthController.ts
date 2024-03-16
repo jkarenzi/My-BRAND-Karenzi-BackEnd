@@ -3,24 +3,27 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken')
 import { Request, Response } from 'express';
 require('dotenv').config()
+const Joi = require('joi')
+const { signupValidationSchema } = require("../validationSchema/SignupSchema")
 
 class authController {
     static async signUp(req:Request, res:Response) {
         const formData = req.body
+
+        const validationResult = signupValidationSchema.validate(formData)
+
+        if(validationResult.error){
+            return res.status(400).json({msg:validationResult.error.details[0].message})
+        }
     
         let user = await User.findOne({username: formData.username})
         if(user){
-            return res.json({msg:"Username already in use"})
+            return res.status(409).json({msg:"Username already in use"})
         }
     
         user = await User.findOne({email: formData.email})
         if(user){
-            return res.json({msg: "Email already in use"})
-        }
-    
-        user = await User.findOne({phoneNumber: formData.phoneNumber})
-        if(user){
-            return res.json({msg: "Phone number already in use"})
+            return res.status(409).json({msg: "Email already in use"})
         }
         
         try{
@@ -33,7 +36,7 @@ class authController {
             })
     
             await newUser.save()
-            return res.json({msg: "Signup successful!"})
+            return res.status(202).json({msg: "Signup successful!"})
         }catch(err: any){
             console.log(err)
             return res.status(500).json({ message: 'Internal server error' });
@@ -48,12 +51,12 @@ class authController {
                 const passwordMatch:boolean = await bcrypt.compare(formData.password, user.password);
                 if(passwordMatch){
                     const token:string = await jwt.sign({ user }, process.env.JWT_SECRET, { expiresIn: '1h' });
-                    return res.json({msg: "Login successful", token: token})
+                    return res.status(200).json({msg: "Login successful", token: token})
                 }else{
-                    return res.json({msg: "Incorrect password"})
+                    return res.status(401).json({msg: "Incorrect password"})
                 }
             }else{
-                return res.json({msg: "Could not find any account with matching username"})
+                return res.status(404).json({msg: "Could not find any account with matching username"})
             }
         }catch(err:any){
             console.log(err.message)
@@ -65,4 +68,3 @@ class authController {
 module.exports = {
     authController
 }
-
