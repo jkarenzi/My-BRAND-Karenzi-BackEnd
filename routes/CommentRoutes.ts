@@ -1,16 +1,16 @@
 const express = require("express")
 import { Router } from 'express';
-const { createComment, getComments, updateComment, deleteComment } = require('../controllers/CommentController')
+const { commentController } = require('../controllers/CommentController')
 const { authorizeAdmin, authenticateUser } = require('../middleware/Authorization')
 
 const router: Router = express.Router()
 
-router.post('/create_comment', authenticateUser, authorizeAdmin, createComment)
+router.post('/create_comment', authenticateUser, authorizeAdmin, commentController.createComment)
 
-router.get('/get_comments', getComments)
+router.get('/get_comments', commentController.getComments)
 
-router.post('/update_comment', authenticateUser, updateComment)
+router.post('/update_comment', authenticateUser, commentController.updateComment)
 
-router.delete('/delete_comment/:id', authenticateUser, deleteComment)
+router.delete('/delete_comment/:id', authenticateUser, commentController.deleteComment)
 
 module.exports = router
