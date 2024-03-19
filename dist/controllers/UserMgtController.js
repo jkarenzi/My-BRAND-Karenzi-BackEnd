@@ -8,7 +8,7 @@ const { updateUsernameSchema, updatePasswordSchema, updateEmailSchema } = requir
 class userMgtController {
     static async getUsers(req, res) {
         try {
-            const users = await User.find();
+            const users = await User.find({}, { password: 0 });
             return res.status(200).json({ userList: users });
         }
         catch (err) {

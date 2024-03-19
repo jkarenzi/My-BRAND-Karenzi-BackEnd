@@ -8,7 +8,7 @@ const { updateUsernameSchema, updatePasswordSchema, updateEmailSchema } = requir
 class userMgtController {
     static async getUsers(req:Request, res:Response) {
         try{
-            const users: Object[] = await User.find()
+            const users: Object[] = await User.find({},{password:0})
             return res.status(200).json({userList: users})
         }catch(err){
             return res.status(500).json({ message: 'Internal server error' });
