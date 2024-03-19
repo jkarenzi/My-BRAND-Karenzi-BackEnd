@@ -35,7 +35,7 @@ class blogController {
         try{
             const blogs: Object[] = await Blog.find()
             return res.status(200).json({blogList: blogs})
-        }catch(err){
+        }catch(err:any){
             return res.status(500).json({ msg: 'Internal server error' });
         }
     }
@@ -49,7 +49,7 @@ class blogController {
             }else{
                 return res.status(404).json({msg:"Blog not found"})
             }
-        }catch(err){
+        }catch(err:any){
             return res.status(500).json({ msg: 'Internal server error' });
         }
     }
@@ -73,7 +73,7 @@ class blogController {
             }else{
                 return res.status(404).json({msg:"Blog not found"})
             }
-        }catch(err){
+        }catch(err:any){
             return res.status(500).json({ msg: 'Internal server error' });
         }
     }
@@ -87,7 +87,7 @@ class blogController {
             }else{
                 return res.status(404).json({msg:"Blog not found"})
             }
-        }catch(err){
+        }catch(err:any){
             return res.status(500).json({ msg: 'Internal server error' });
         }
     }
@@ -107,6 +107,8 @@ class blogController {
             const like = await Like.findOne({blogId,userId})
             if(like){
                 const deleted = await Like.findByIdAndDelete(like._id)
+                const newLikeCount = await Like.countDocuments({blogId})
+                await Blog.findByIdAndUpdate(new ObjectId(blogId),{likes:newLikeCount})
                 return res.status(204)
             }else{
                 const newLike = Like({
@@ -114,9 +116,11 @@ class blogController {
                     blogId
                 })
                 await newLike.save()
+                const newLikeCount = await Like.countDocuments({blogId})
+                await Blog.findByIdAndUpdate(new ObjectId(blogId),{likes:newLikeCount})
                 return res.status(201).json({msg:"Like saved successfully"})
             }        
-        }catch(err){
+        }catch(err:any){
             return res.status(500).json({ msg: 'Internal server error' });
         }
     }
@@ -136,6 +140,8 @@ class blogController {
             const dislike = await Dislike.findOne({blogId,userId})
             if(dislike){
                 const deleted = await Dislike.findByIdAndDelete(dislike._id)
+                const newDislikeCount = await Dislike.countDocuments({blogId})
+                await Blog.findByIdAndUpdate(new ObjectId(blogId),{dislikes:newDislikeCount})
                 return res.status(204)
             }else{
                 const newDislike = Dislike({
@@ -143,9 +149,11 @@ class blogController {
                     blogId
                 })
                 await newDislike.save()
+                const newDislikeCount = await Dislike.countDocuments({blogId})
+                await Blog.findByIdAndUpdate(new ObjectId(blogId),{dislikes:newDislikeCount})
                 return res.status(201).json({msg:"Dislike saved successfully"})
             }    
-        }catch(err){
+        }catch(err:any){
             return res.status(500).json({ msg: 'Internal server error' });
         }
     }

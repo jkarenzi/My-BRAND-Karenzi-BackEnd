@@ -100,6 +100,8 @@ class blogController {
             const like = await Like.findOne({ blogId, userId });
             if (like) {
                 const deleted = await Like.findByIdAndDelete(like._id);
+                const newLikeCount = await Like.countDocuments({ blogId });
+                await Blog.findByIdAndUpdate(new ObjectId(blogId), { likes: newLikeCount });
                 return res.status(204);
             }
             else {
@@ -108,6 +110,8 @@ class blogController {
                     blogId
                 });
                 await newLike.save();
+                const newLikeCount = await Like.countDocuments({ blogId });
+                await Blog.findByIdAndUpdate(new ObjectId(blogId), { likes: newLikeCount });
                 return res.status(201).json({ msg: "Like saved successfully" });
             }
         }
@@ -127,6 +131,8 @@ class blogController {
             const dislike = await Dislike.findOne({ blogId, userId });
             if (dislike) {
                 const deleted = await Dislike.findByIdAndDelete(dislike._id);
+                const newDislikeCount = await Dislike.countDocuments({ blogId });
+                await Blog.findByIdAndUpdate(new ObjectId(blogId), { dislikes: newDislikeCount });
                 return res.status(204);
             }
             else {
@@ -135,6 +141,8 @@ class blogController {
                     blogId
                 });
                 await newDislike.save();
+                const newDislikeCount = await Dislike.countDocuments({ blogId });
+                await Blog.findByIdAndUpdate(new ObjectId(blogId), { dislikes: newDislikeCount });
                 return res.status(201).json({ msg: "Dislike saved successfully" });
             }
         }
