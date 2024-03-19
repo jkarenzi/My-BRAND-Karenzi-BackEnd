@@ -4,13 +4,13 @@ const ts = require('gulp-typescript');
 const tsProject = ts.createProject('tsconfig.json');
 
 function compileTS() {
-    return tsProject.src(['routes/**/*.ts', 'controllers/**/*.ts', '*.ts','models/**/*.ts'])
+    return gulp.src(['./**/*.ts', '!node_modules/**/*.ts'])
         .pipe(tsProject())
         .pipe(gulp.dest('dist'));
 }
 
 function watch() {
-    gulp.watch(['routes/**/*.ts', 'controllers/**/*.ts', '*.ts','models/**/*.ts'], compileTS);
+    gulp.watch(['./**/*.ts',"!node_modules/**/*.ts"], compileTS);
 }
 
 exports.default = gulp.series(compileTS, watch);
