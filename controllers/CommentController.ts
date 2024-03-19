@@ -1,4 +1,5 @@
 const Comment = require("../models/CommentModel")
+const Blog = require("../models/BlogModel")
 import { Request, Response } from 'express';
 const mongoose = require("mongoose")
 const ObjectId = mongoose.Types.ObjectId;
@@ -25,6 +26,8 @@ class commentController {
     
         try{
             await newComment.save()
+            const newCommentCount = await Comment.countDocuments({blogId})
+            await Blog.findByIdAndUpdate(new ObjectId(blogId),{comments:newCommentCount})
             return res.status(201).json({msg:"Comment saved successfully"})
         }catch(err:any){
             return res.status(500).json({ msg: 'Internal server error' });
@@ -43,11 +46,14 @@ class commentController {
     static async deleteComment(req:Request, res:Response){
         const id = new ObjectId(req.params.id)
         try{
+            const comment = await Comment.findOne({_id:id})
             const deletedComment = await Comment.findByIdAndDelete(id)
             if(!deletedComment){
                 return res.status(404).json({msg: "Comment not found"})
             }
-    
+            
+            const newCommentCount = await Comment.countDocuments({blogId: comment.blogId})
+            await Blog.findByIdAndUpdate(new ObjectId(comment.blogId),{comments:newCommentCount})
             return res.status(204)
         }catch(err:any){
             return res.status(500).json({ msg: 'Internal server error' });

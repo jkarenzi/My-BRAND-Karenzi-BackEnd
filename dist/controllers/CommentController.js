@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Comment = require("../models/CommentModel");
+const Blog = require("../models/BlogModel");
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
 const { createCommentValidationSchema, updateCommentValidationSchema } = require('../ValidationSchema/CommentSchema');
@@ -21,6 +22,8 @@ class commentController {
         });
         try {
             await newComment.save();
+            const newCommentCount = await Comment.countDocuments({ blogId });
+            await Blog.findByIdAndUpdate(new ObjectId(blogId), { comments: newCommentCount });
             return res.status(201).json({ msg: "Comment saved successfully" });
         }
         catch (err) {
@@ -39,10 +42,13 @@ class commentController {
     static async deleteComment(req, res) {
         const id = new ObjectId(req.params.id);
         try {
+            const comment = await Comment.findOne({ _id: id });
             const deletedComment = await Comment.findByIdAndDelete(id);
             if (!deletedComment) {
                 return res.status(404).json({ msg: "Comment not found" });
             }
+            const newCommentCount = await Comment.countDocuments({ blogId: comment.blogId });
+            await Blog.findByIdAndUpdate(new ObjectId(comment.blogId), { comments: newCommentCount });
             return res.status(204);
         }
         catch (err) {
