@@ -1,21 +1,22 @@
 const express = require("express")
 import { Router } from 'express';
-const { blogController } = require('../controllers/BlogController')
+const { createBlog, getBlogs, getBlog, updateBlog, deleteBlog, like, dislike } = require('../controllers/BlogController')
+const { authorizeAdmin, authenticateUser } = require('../middleware/Authorization')
 
 const router: Router = express.Router()
 
-router.post('/create_blog', blogController.createBlog)
+router.post('/create_blog', authenticateUser, authorizeAdmin, createBlog)
 
-router.get('/get_blogs', blogController.getBlogs)
+router.get('/get_blogs', getBlogs)
 
-router.get('/get_blog/:id', blogController.getBlog)
+router.get('/get_blog/:id', getBlog)
 
-router.post('/update_blog', blogController.updateBlog)
+router.post('/update_blog', authenticateUser, authorizeAdmin, updateBlog)
 
-router.delete('/delete_blog/:id', blogController.deleteBlog)
+router.delete('/delete_blog/:id', authenticateUser, authorizeAdmin, deleteBlog)
 
-router.post('/like', blogController.like)
+router.post('/like', authenticateUser, like)
 
-router.post('/dislike', blogController.dislike)
+router.post('/dislike', authenticateUser, dislike)
 
 module.exports = router
