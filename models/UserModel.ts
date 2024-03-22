@@ -4,6 +4,7 @@ interface IUser {
     username:string,
     password:string,
     email:string,
+    isAdmin?:boolean
 }
 
 const UserSchema = new Schema<IUser>({
@@ -19,6 +20,9 @@ const UserSchema = new Schema<IUser>({
         type: String,
         required: true
     },
+    isAdmin:{
+        default:false
+    }
 },{timestamps: true})
 
 module.exports = model('User', UserSchema)
