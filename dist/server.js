@@ -2,6 +2,7 @@
 const express = require('express');
 const mongoose = require("mongoose");
 require('dotenv').config();
+const blogRoutes = require('./routes/BlogRoutes');
 const commentRoutes = require('./routes/CommentRoutes');
 const queryRoutes = require('./routes/QueryRoutes');
 const usermgtRoutes = require('./routes/UserMgtRoutes');
@@ -20,6 +21,7 @@ mongoose.connect(url)
     console.log(err);
 });
 
+app.use('/blogs', blogRoutes);
 app.use('/comments', commentRoutes);
 app.use('/queries', queryRoutes);
 app.use('/usermgt', usermgtRoutes);
