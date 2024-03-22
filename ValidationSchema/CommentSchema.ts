@@ -1,3 +1,5 @@
+export {};
+const Joi = require("joi")
 const createCommentValidationSchema = Joi.object({
     userId: Joi.string().length(24).required(),
     blogId: Joi.string().length(24).required(),

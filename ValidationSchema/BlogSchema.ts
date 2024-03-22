@@ -1,3 +1,6 @@
+export {};
+const Joi = require("joi")
+
 const createBlogValidationSchema = Joi.object({
     title: Joi.string().regex(/^\w+(\s+\w+){5,15}[.,?!]?$/).required(),
     content: Joi.string().regex(/^\w+(\s+\w+){99,}[.,?!]?$/).required()

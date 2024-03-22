@@ -1,3 +1,4 @@
+export {};
 const Joi = require("joi")
 
 const updateUsernameSchema = Joi.object({
