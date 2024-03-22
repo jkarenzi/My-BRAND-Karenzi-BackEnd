@@ -21,6 +21,7 @@ const UserSchema = new Schema<IUser>({
         required: true
     },
     isAdmin:{
+        type:Boolean,
         default:false
     }
 },{timestamps: true})
