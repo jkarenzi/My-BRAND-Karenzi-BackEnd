@@ -4,7 +4,7 @@ const ts = require('gulp-typescript');
 const tsProject = ts.createProject('tsconfig.json');
 
 function compileTS() {
-    return gulp.src(['./**/*.ts', '!node_modules/**/*.ts'])
+    return gulp.src(['./**/*.ts', '!node_modules/**/*.ts', '!__tests__/**/*.ts'])
         .pipe(tsProject())
         .pipe(gulp.dest('dist'));
 }
