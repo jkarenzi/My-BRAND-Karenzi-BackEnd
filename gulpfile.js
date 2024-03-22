@@ -9,8 +9,8 @@ function compileTS() {
         .pipe(gulp.dest('dist'));
 }
 
-function watch() {
-    gulp.watch(['./**/*.ts',"!node_modules/**/*.ts"], compileTS);
-}
+//function watch() {
+    //gulp.watch(['./**/*.ts',"!node_modules/**/*.ts"], compileTS);
+//}
 
-exports.default = gulp.series(compileTS, watch);
+exports.default = gulp.series(compileTS);
