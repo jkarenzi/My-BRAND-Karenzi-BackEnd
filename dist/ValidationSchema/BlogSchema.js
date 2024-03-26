@@ -1,13 +1,14 @@
 "use strict";
-const Joi = require('joi');
+Object.defineProperty(exports, "__esModule", { value: true });
+const Joi = require("joi");
 const createBlogValidationSchema = Joi.object({
-    title: Joi.string().regex(/^\w+(\s+\w+){5,15}[.,?!]?$/).required(),
-    content: Joi.string().regex(/^\w+(\s+\w+){99,}[.,?!]?$/).required()
+    title: Joi.string().regex(/[A-Za-z0-9\s.?!,;:-]/).required(),
+    content: Joi.string().regex(/[A-Za-z0-9\s.?!,;:-]/).required(),
 });
 const updateBlogValidationSchema = Joi.object({
     id: Joi.string().length(24).required(),
-    title: Joi.string().regex(/^\w+(\s+\w+){5,15}[.,?!]?$/).required(),
-    content: Joi.string().regex(/^\w+(\s+\w+){99,}[.,?!]?$/).required()
+    title: Joi.string().regex(/[A-Za-z0-9\s.?!,;:-]/).required(),
+    content: Joi.string().regex(/[A-Za-z0-9\s.?!,;:-]/).required(),
 });
 const blogActionValidationSchema = Joi.object({
     userId: Joi.string().length(24).required(),

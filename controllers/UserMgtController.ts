@@ -3,7 +3,16 @@ const bcrypt = require('bcrypt');
 import { Request, Response } from 'express';
 const mongoose = require("mongoose")
 const ObjectId = mongoose.Types.ObjectId;
-const { updateUsernameSchema, updatePasswordSchema, updateEmailSchema } = require('../ValidationSchema/UserSchema')
+const { updateUsernameSchema, updatePasswordSchema, updateEmailSchema, updateProfileSchema } = require('../ValidationSchema/UserSchema')
+
+import {v2 as cloudinary} from 'cloudinary';
+          
+cloudinary.config({ 
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.API_KEY, 
+    api_secret: process.env.API_SECRET 
+});
+
 
 class userMgtController {
     static async getUsers(req:Request, res:Response) {
@@ -23,7 +32,7 @@ class userMgtController {
                 return res.status(404).json({msg: "User not found"})
             }
     
-            return res.status(204)
+            return res.status(204).json({})
         }catch(err:any){
             return res.status(500).json({ message: 'Internal server error' });
         }
@@ -123,6 +132,47 @@ class userMgtController {
                     }
                 }else{
                     return res.status(401).json({msg: "Incorrect password"})
+                }
+            }else{
+                return res.status(404).json({msg: "User not found"})
+            }
+        }catch(err:any){
+            return res.status(500).json({ message: 'Internal server error' });
+        }
+    }
+
+    static async updateProfile(req:Request, res:Response){
+        const formData = req.body
+        const validationResult = updateProfileSchema.validate(formData)
+
+        if(validationResult.error){
+            return res.status(400).json({msg:validationResult.error.details[0].message})
+        }
+
+        const id = new ObjectId(formData.id)
+        const password:string = formData.password
+        const files = req.files
+        const file = files.image[0]
+    
+        try{
+            const user = await User.findOne({_id:id})
+            if(user){
+                const passwordMatch:boolean = await bcrypt.compare(password, user.password);
+                if(passwordMatch){
+                    const uploadResult:any = await new Promise((resolve) => {
+                        cloudinary.uploader.upload_stream((error:Error, uploadResult:any) => {
+                            return resolve(uploadResult);
+                        }).end(file.buffer);
+                    });
+    
+                    const updatedDoc = await User.findByIdAndUpdate(id,{imageUrl:uploadResult.url},{new:true})
+                    if(updatedDoc){
+                        return res.status(200).json({msg: "ProfileImg successfully updated"})
+                    }else{
+                        return res.status(400).json({msg: "Update unsuccessful"})
+                    }
+                }else{
+                    return res.status(200).json({msg: "Incorrect password"})
                 }
             }else{
                 return res.status(404).json({msg: "User not found"})

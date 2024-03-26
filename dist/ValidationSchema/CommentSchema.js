@@ -1,5 +1,6 @@
 "use strict";
-const Joi = require('joi');
+Object.defineProperty(exports, "__esModule", { value: true });
+const Joi = require("joi");
 const createCommentValidationSchema = Joi.object({
     userId: Joi.string().length(24).required(),
     blogId: Joi.string().length(24).required(),

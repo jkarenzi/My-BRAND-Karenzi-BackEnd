@@ -14,5 +14,13 @@ const UserSchema = new mongoose_1.Schema({
         type: String,
         required: true
     },
+    isAdmin: {
+        type: Boolean,
+        default: false
+    },
+    imageUrl: {
+        type: String,
+        default: "https://res.cloudinary.com/ditrc0kph/image/upload/v1711450197/rgrjpswkhjey1xgunqhr.png"
+    }
 }, { timestamps: true });
 module.exports = (0, mongoose_1.model)('User', UserSchema);

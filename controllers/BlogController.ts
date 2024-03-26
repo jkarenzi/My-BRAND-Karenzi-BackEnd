@@ -4,7 +4,25 @@ const Dislike = require('../models/DislikeModel')
 import { Request, Response } from 'express';
 const mongoose = require("mongoose")
 const ObjectId = mongoose.Types.ObjectId;
+
+import {v2 as cloudinary} from 'cloudinary';
 const { createBlogValidationSchema, updateBlogValidationSchema, blogActionValidationSchema } = require('../ValidationSchema/BlogSchema')
+
+declare global {
+    namespace Express {
+        interface Request {
+            files: any; 
+        }
+    }
+}
+          
+cloudinary.config({ 
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.API_KEY,
+    api_secret: process.env.API_SECRET 
+});
+
+
 
 class blogController {
     static async createBlog(req:Request, res:Response){
@@ -18,17 +36,28 @@ class blogController {
         const title = formData.title
         const content = formData.content
     
-        const newBlog = Blog({
-            title,
-            content,
-        })
-    
+        const files = req.files
+        const file = files.image[0]
+
         try{
+            const uploadResult:any = await new Promise((resolve) => {
+                cloudinary.uploader.upload_stream((error:Error, uploadResult:any) => {
+                    return resolve(uploadResult);
+                }).end(file.buffer);
+            });
+        
+            const newBlog = Blog({
+                title,
+                content,
+                imageUrl: uploadResult.url
+            })
+        
             await newBlog.save()
+        
             return res.status(201).json({msg:"Blog saved successfully"})
         }catch(err:any){
             return res.status(500).json({ msg: 'Internal server error' });
-        }
+        }   
     }
     
     static async getBlogs(req:Request, res:Response){
@@ -66,14 +95,23 @@ class blogController {
         const title:string = formData.title
         const content:string = formData.content
     
+        const files = req.files
+        const file = files.image[0]
+
         try{
-            const updatedDoc = await Blog.findByIdAndUpdate(id,{title,content},{new:true})
+            const uploadResult:any = await new Promise((resolve) => {
+                cloudinary.uploader.upload_stream((error:Error, uploadResult:any) => {
+                    return resolve(uploadResult);
+                }).end(file.buffer);
+            });
+
+            const updatedDoc = await Blog.findByIdAndUpdate(id,{title,content,imageUrl:uploadResult.url},{new:true})
             if(updatedDoc){
                 return res.status(200).json({msg:"Blog updated successfully"})
             }else{
                 return res.status(404).json({msg:"Blog not found"})
             }
-        }catch(err:any){
+        }catch(err){
             return res.status(500).json({ msg: 'Internal server error' });
         }
     }
@@ -83,7 +121,7 @@ class blogController {
         try{
             const deletedDoc = await Blog.findByIdAndDelete(id)
             if(deletedDoc){
-                return res.status(204)
+                return res.status(204).json({})
             }else{
                 return res.status(404).json({msg:"Blog not found"})
             }
@@ -109,7 +147,7 @@ class blogController {
                 const deleted = await Like.findByIdAndDelete(like._id)
                 const newLikeCount = await Like.countDocuments({blogId})
                 await Blog.findByIdAndUpdate(new ObjectId(blogId),{likes:newLikeCount})
-                return res.status(204)
+                return res.status(204).json({})
             }else{
                 const newLike = Like({
                     userId,
@@ -142,7 +180,7 @@ class blogController {
                 const deleted = await Dislike.findByIdAndDelete(dislike._id)
                 const newDislikeCount = await Dislike.countDocuments({blogId})
                 await Blog.findByIdAndUpdate(new ObjectId(blogId),{dislikes:newDislikeCount})
-                return res.status(204)
+                return res.status(204).json({})
             }else{
                 const newDislike = Dislike({
                     userId,
