@@ -7,15 +7,14 @@ const { signupValidationSchema } = require("../validationSchema/SignupSchema")
 
 const User = require('../models/UserModel')
 jest.mock('../models/UserModel')
-jest.mock('../node_modules/bcrypt')
-jest.mock('../node_modules/jsonwebtoken')
+jest.mock('bcrypt')
+jest.mock('jsonwebtoken')
 jest.mock('../validationSchema/SignupSchema')
 
 const res:any = {}
 
 res.json = jest.fn((x:Object) => x),
 res.status = jest.fn((x:number) => res)
-
 
 const req = {
     body:{
@@ -27,7 +26,17 @@ const req = {
 
 
 describe("Auth Controller", () => {
+     //it("should return an error for failed validation on signup", async () => {
+        //signupValidationSchema.validate.mockResolvedValueOnce({error:"username should be > 5 chars"})
+
+        //await authController.signUp(req,res)
+
+        //expect(res.status).toHaveBeenCalledWith(400)
+        //expect(res.json).toHaveBeenCalledWith({msg: "username should be > 5 chars"})
+    //})
+
     it("should return an error for existing username", async () => {
+        signupValidationSchema.validate.mockResolvedValueOnce({error:""})
         User.findOne.mockImplementationOnce(() => ({
             id: '1',
             username: req.body.username,
@@ -42,6 +51,7 @@ describe("Auth Controller", () => {
     })
 
     it("should return an error for existing email", async () => {
+        signupValidationSchema.validate.mockResolvedValueOnce({error:""})
         User.findOne.mockResolvedValueOnce(null)
 
         User.findOne.mockImplementationOnce(() => ({
@@ -58,19 +68,30 @@ describe("Auth Controller", () => {
     })
 
     it("successful signUp", async () => {
+        signupValidationSchema.validate.mockResolvedValueOnce({error:""})
         User.findOne.mockResolvedValueOnce(null)
         User.findOne.mockResolvedValueOnce(null)
 
         bcrypt.hash.mockResolvedValueOnce("hashed password")
 
-        jest.spyOn(User.prototype, 'save').mockResolvedValueOnce(Promise.resolve());
+        // const newUser = User({
+        //     username:req.body.username,
+        //     password: req.body.password,
+        //     email: req.body.email,
+        // })
+
+        // newUser.save = jest.fn(() => User)
+
+        // newUser.save.mockImplementationOnce(() => Promise.resolve())
+
+        //jest.spyOn(User.prototype, 'save').mockResolvedValueOnce(Promise.resolve());
 
         await authController.signUp(req,res)
 
         expect(res.status).toHaveBeenCalledWith(201)
         expect(res.json).toHaveBeenCalledWith({msg: "Signup successful"})
     })
-
+    
     it("successful login", async () => {
         User.findOne.mockImplementationOnce(() => ({
             id: '1',
@@ -115,6 +136,7 @@ describe("Auth Controller", () => {
     })
 
     it("should handle errors during signup", async () => {
+        signupValidationSchema.validate.mockResolvedValueOnce({error:""})
         User.findOne.mockResolvedValueOnce(null)
         User.findOne.mockResolvedValueOnce(null)
 

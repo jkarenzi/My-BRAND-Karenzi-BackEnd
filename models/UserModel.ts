@@ -4,7 +4,8 @@ interface IUser {
     username:string,
     password:string,
     email:string,
-    isAdmin?:boolean
+    isAdmin?:boolean,
+    imageUrl?:string
 }
 
 const UserSchema = new Schema<IUser>({
@@ -23,6 +24,10 @@ const UserSchema = new Schema<IUser>({
     isAdmin:{
         type:Boolean,
         default:false
+    },
+    imageUrl:{
+        type:String,
+        default: "https://res.cloudinary.com/ditrc0kph/image/upload/v1711450197/rgrjpswkhjey1xgunqhr.png"
     }
 },{timestamps: true})
 

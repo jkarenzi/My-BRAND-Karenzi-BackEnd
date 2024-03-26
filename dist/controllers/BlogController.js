@@ -5,7 +5,13 @@ const Like = require('../models/LikeModel');
 const Dislike = require('../models/DislikeModel');
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
+const cloudinary_1 = require("cloudinary");
 const { createBlogValidationSchema, updateBlogValidationSchema, blogActionValidationSchema } = require('../ValidationSchema/BlogSchema');
+cloudinary_1.v2.config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.API_KEY,
+    api_secret: process.env.API_SECRET
+});
 class blogController {
     static async createBlog(req, res) {
         const formData = req.body;
@@ -15,11 +21,19 @@ class blogController {
         }
         const title = formData.title;
         const content = formData.content;
-        const newBlog = Blog({
-            title,
-            content,
-        });
+        const files = req.files;
+        const file = files.image[0];
         try {
+            const uploadResult = await new Promise((resolve) => {
+                cloudinary_1.v2.uploader.upload_stream((error, uploadResult) => {
+                    return resolve(uploadResult);
+                }).end(file.buffer);
+            });
+            const newBlog = Blog({
+                title,
+                content,
+                imageUrl: uploadResult.url
+            });
             await newBlog.save();
             return res.status(201).json({ msg: "Blog saved successfully" });
         }
@@ -60,10 +74,17 @@ class blogController {
         const id = new ObjectId(formData.id);
         const title = formData.title;
         const content = formData.content;
+        const files = req.files;
+        const file = files.image[0];
         try {
-            const updatedDoc = await Blog.findByIdAndUpdate(id, { title, content }, { new: true });
+            const uploadResult = await new Promise((resolve) => {
+                cloudinary_1.v2.uploader.upload_stream((error, uploadResult) => {
+                    return resolve(uploadResult);
+                }).end(file.buffer);
+            });
+            const updatedDoc = await Blog.findByIdAndUpdate(id, { title, content, imageUrl: uploadResult.url }, { new: true });
             if (updatedDoc) {
-                return res.status(200).json({ msg: "Blog updated successfully" });
+                return res.json({ msg: "Blog updated successfully" });
             }
             else {
                 return res.status(404).json({ msg: "Blog not found" });
@@ -78,7 +99,7 @@ class blogController {
         try {
             const deletedDoc = await Blog.findByIdAndDelete(id);
             if (deletedDoc) {
-                return res.status(204);
+                return res.status(204).json({});
             }
             else {
                 return res.status(404).json({ msg: "Blog not found" });
@@ -102,7 +123,7 @@ class blogController {
                 const deleted = await Like.findByIdAndDelete(like._id);
                 const newLikeCount = await Like.countDocuments({ blogId });
                 await Blog.findByIdAndUpdate(new ObjectId(blogId), { likes: newLikeCount });
-                return res.status(204);
+                return res.status(204).json({});
             }
             else {
                 const newLike = Like({
@@ -133,7 +154,7 @@ class blogController {
                 const deleted = await Dislike.findByIdAndDelete(dislike._id);
                 const newDislikeCount = await Dislike.countDocuments({ blogId });
                 await Blog.findByIdAndUpdate(new ObjectId(blogId), { dislikes: newDislikeCount });
-                return res.status(204);
+                return res.status(204).json({});
             }
             else {
                 const newDislike = Dislike({

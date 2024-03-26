@@ -3,6 +3,7 @@ import { Schema, model } from "mongoose"
 interface IBlog {
     title:string,
     content:string,
+    imageUrl:string,
     likes?: number,
     dislikes?: number
     comments?: number
@@ -16,6 +17,10 @@ const BlogSchema = new Schema<IBlog>({
     content:{
         type: String,
         required:true
+    },
+    imageUrl:{
+        type:String,
+        required: true
     },
     likes:{
         type: Number,

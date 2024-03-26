@@ -49,7 +49,7 @@ class commentController {
             }
             const newCommentCount = await Comment.countDocuments({ blogId: comment.blogId });
             await Blog.findByIdAndUpdate(new ObjectId(comment.blogId), { comments: newCommentCount });
-            return res.status(204);
+            return res.status(204).json({});
         }
         catch (err) {
             return res.status(500).json({ msg: 'Internal server error' });
